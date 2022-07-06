@@ -28,4 +28,11 @@ describe AlbumRepository do
         expect(albums[1].release_year).to eq 1988
         expect(albums[1].artist_id).to eq 1
     end
+    it "returns a single Album object" do
+        repo = AlbumRepository.new
+        album = repo.find(2)
+        expect(album.id).to eq 2
+        expect(album.title).to eq "Surfer Rosa"
+        expect(album.release_year).to eq 1988
+    end
 end
