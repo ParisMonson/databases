@@ -28,4 +28,9 @@ class AlbumRepository
     album.artist_id = record["artist_id"] 
     album
   end
+
+  def create(album)
+    sql = "INSERT INTO albums (title, release_year, artist_id) VALUES ($1, $2, $3);"
+    DatabaseConnection.exec_params(sql, [album.title, album.release_year, album.artist_id])
+  end
 end

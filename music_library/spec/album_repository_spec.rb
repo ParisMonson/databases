@@ -35,4 +35,18 @@ describe AlbumRepository do
         expect(album.title).to eq "Surfer Rosa"
         expect(album.release_year).to eq 1988
     end
+    it "creates a new album record" do
+        repo = AlbumRepository.new
+        album = Album.new
+        album.title = 'Trompe le Monde'
+        album.release_year = 1991
+        album.artist_id = 1
+        repo.create(album)
+
+        all_albums = repo.all
+        expect(all_albums.length).to eq 3
+        expect(all_albums[2].title).to eq 'Trompe le Monde'
+        expect(all_albums[2].release_year).to eq 1991
+        expect(all_albums[2].artist_id).to eq 1
+    end
 end
