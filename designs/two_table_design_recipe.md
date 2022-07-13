@@ -8,21 +8,33 @@ _Copy this recipe template to design and create two related database tables from
 # EXAMPLE USER STORY:
 # (analyse only the relevant part - here the final line).
 
-As a music lover,
-So I can organise my records,
-I want to keep a list of albums' titles.
+As a shop manager
+So I can know which items I have in stock
+I want to keep a list of my shop items with their name and unit price.
 
-As a music lover,
-So I can organise my records,
-I want to keep a list of albums' release years.
+As a shop manager
+So I can know which items I have in stock
+I want to know which quantity (a number) I have for each item.
 
-As a music lover,
-So I can organise my records,
-I want to keep a list of artists' names.
+As a shop manager
+So I can manage items
+I want to be able to create a new item.
 
-As a music lover,
-So I can organise my records,
-I want to know each album's artist.
+As a shop manager
+So I can know which orders were made
+I want to keep a list of orders with their customer name.
+
+As a shop manager
+So I can know which orders were made
+I want to assign each order to their corresponding item.
+
+As a shop manager
+So I can know which orders were made
+I want to know on which date an order was placed. 
+
+As a shop manager
+So I can manage orders
+I want to be able to create a new order.
 ```
 
 ```

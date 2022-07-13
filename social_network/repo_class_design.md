@@ -8,15 +8,15 @@ If the table is already created in the database, you can skip this step.
 
 Otherwise, [follow this recipe to design and create the SQL schema for your table](./single_table_design_recipe_template.md).
 
-*In this template, we'll use an example table `students`*
+*In this template, we'll use an example table `posts`*
 
 ```
 # EXAMPLE
 
-Table: students
+Table: posts
 
 Columns:
-id | name | cohort_name
+id | title | content | user_id
 ```
 
 ## 2. Create Test SQL seeds
@@ -28,10 +28,10 @@ If seed data is provided (or you already created it), you can skip this step.
 ```sql
 -- EXAMPLE
 -- (file: spec/seeds_{table_name}.sql)
-TRUNCATE TABLE students RESTART IDENTITY;
+TRUNCATE TABLE posts RESTART IDENTITY;
 
-INSERT INTO students (name, cohort_name) VALUES ('David', 'April 2022');
-INSERT INTO students (name, cohort_name) VALUES ('Anna', 'May 2022');
+INSERT INTO posts (title, content, views, user_id) VALUES ('Happy Birthday', 'Have a good day', 122, 1);
+INSERT INTO posts (title, content, views, user_id) VALUES ('Morning', 'Random stuff', 600, 2);
 
   
 ```
@@ -48,17 +48,17 @@ Usually, the Model class name will be the capitalised table name (single instead
 
 ```ruby
 # EXAMPLE
-# Table name: students
+# Table name: posts
 
 # Model class
-# (in lib/student.rb)
-class Student
+# (in lib/user.rb)
+class Post
 
 end
 
 # Repository class
-# (in lib/student_repository.rb)
-class StudentRepository
+# (in lib/user_repository.rb)
+class PostRepository
 
 end
 ```
@@ -69,12 +69,12 @@ Define the attributes of your Model class. You can usually map the table columns
 
 ```ruby
 # EXAMPLE
-# Table name: students
+# Table name: posts
 
 # Model class
-# (in lib/student.rb)
+# (in lib/user.rb)
 
-class Student
+class Post
 
   # Replace the attributes by your own columns.
   attr_accessor :id, :name, :cohort_name
@@ -84,9 +84,9 @@ end
 # which allows us to set and get attributes on an object,
 # here's an example:
 #
-# student = Student.new
-# student.name = 'Jo'
-# student.name
+# user = user.new
+# user.name = 'Jo'
+# user.name
 ```
 
 *You may choose to test-drive this class, but unless it contains any more logic than the example above, it is probably not needed.*
@@ -99,44 +99,48 @@ Using comments, define the method signatures (arguments and return value) and wh
 
 ```ruby
 # EXAMPLE
-# Table name: students
+# Table name: posts
 
 # Repository class
-# (in lib/student_repository.rb)
+# (in lib/user_repository.rb)
 
-class StudentRepository
+class PostRepository
 
   # Selecting all records
   # No arguments
   def all
     # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students;
+    # SELECT * FROM posts;
 
-    # Returns an array of Student objects.
+    # Returns an array of Post objects.
   end
 
   # Gets a single record by its ID
   # One argument: the id (number)
   def find(id)
     # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students WHERE id = $1;
+    # SELECT * FROM posts WHERE id = $1;
 
-    # Returns a single Student object.
+    # Returns a single Post object.
   end
 
   # Add more methods below for each operation you'd like to implement.
 
-    # adds a single record to students
-    # takes a student object as an argument
-   def create(student)
+    # adds a single record to posts
+    # takes a user object as an argument
+   def create(post)
+   # Executes the SQL query:
+   # INSERT INTO posts (title, content, views, user_id)
+   # VALUES ('Test', 'This is a test', 456, 1)
    # returns nothing
 
    end
 
-   def update(student)
-   end
-
-   def delete(student)
+   def delete(post)
+      # Executes the SQL query:
+      # DELETE FROM posts WHERE
+      # title = $1;
+      # Returns nothing
    end
 end
 ```
@@ -151,34 +155,67 @@ These examples will later be encoded as RSpec tests.
 # EXAMPLES
 
 # 1
-# Get all students
+# Get all posts
 
-repo = StudentRepository.new
+repo = PostRepository.new
 
-students = repo.all
+posts = repo.all
 
-students.length # =>  2
+posts[0].id #=> 1
+posts[0].username #=> "David432"
+posts[0].email #=> "david432@yahoo.com"
 
-students[0].id # =>  1
-students[0].name # =>  'David'
-students[0].cohort_name # =>  'April 2022'
 
-students[1].id # =>  2
-students[1].name # =>  'Anna'
-students[1].cohort_name # =>  'May 2022'
+posts[1].id #=> 2
+posts[1].username #=> "Anna123"
+posts[1].email #=> "anna123@gmail.com"
+
 
 # 2
-# Get a single student
+# Get a single post
 
-repo = StudentRepository.new
+repo = PostRepository.new
 
-student = repo.find(1)
+post = repo.find(1)
 
-student.id # =>  1
-student.name # =>  'David'
-student.cohort_name # =>  'April 2022'
+post.id # =>  1
+post.title # =>  'Happy Birthday'
+post.content # =>  'Have a good day'
+post.views# =>  122
+post.user_id# =>  1
 
-# Add more examples for each method
+# 3
+# Creates a new post record
+
+repo = PostRepository.new
+
+post = Post.new
+post.title = "Test"
+post.content = "Some stuff here"
+post.views = 600
+post.user_id = 1
+
+repo.create(post)
+posts = repo.all
+posts[2].title #=> "Test"
+posts[2].content #=> "Some stuff here"
+posts[2].views #=> 600
+posts[2].user_id #=> 1
+
+
+# 4
+# Delete's a post record
+
+repo = PostRepository.new
+
+repo.delete(1)
+
+posts = repo.all
+
+posts[0].title #=> 'Morning'
+posts[0].content #=> 'Random stuff'
+posts[0].views #=> 600
+posts[0].user_id #=> 2
 
 
 ```
@@ -194,17 +231,17 @@ This is so you get a fresh table contents every time you run the test suite.
 ```ruby
 # EXAMPLE
 
-# file: spec/student_repository_spec.rb
+# file: spec/user_repository_spec.rb
 
-def reset_students_table
-  seed_sql = File.read('spec/seeds_students.sql')
-  connection = PG.connect({ host: '127.0.0.1', dbname: 'students' })
+def reset_posts_table
+  seed_sql = File.read('spec/seeds_posts.sql')
+  connection = PG.connect({ host: '127.0.0.1', dbname: 'posts' })
   connection.exec(seed_sql)
 end
 
-describe StudentRepository do
+describe userRepository do
   before(:each) do 
-    reset_students_table
+    reset_posts_table
   end
 
   # (your tests will go here).
